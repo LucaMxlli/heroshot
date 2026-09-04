@@ -1,10 +1,10 @@
 export const BASE_WIDTH = 31.26
 export const BASE_DEPTH = 22.12
-export const BASE_THICKNESS = 0.88
+export const BASE_THICKNESS = 0.74
 
 export const LID_WIDTH = 31.26
 export const LID_HEIGHT = 21.4
-export const LID_THICKNESS = 0.36
+export const LID_THICKNESS = 0.30
 
 export const BEZEL_SIDE = 0.505
 export const BEZEL_TOP = 0.56
@@ -28,8 +28,8 @@ export const NOTCH_VISIBLE_HEIGHT = 0.82
 export const NOTCH_HEIGHT = 1.3
 export const NOTCH_RADIUS = 0.42
 
-export const FRONT_SCOOP_WIDTH = 6.6
-export const FRONT_SCOOP_DEPTH = 0.46
+export const FRONT_SCOOP_WIDTH = 5.4
+export const FRONT_SCOOP_DEPTH = 0.22
 
 export interface PortSpec {
   side: -1 | 1
@@ -40,14 +40,20 @@ export interface PortSpec {
 }
 
 export const PORTS: PortSpec[] = [
-  { side: -1, z: -3.1, width: 1.02, height: 0.36, radius: 0.14 },
-  { side: -1, z: -0.2, width: 0.96, height: 0.3, radius: 0.15 },
-  { side: -1, z: 2.1, width: 0.96, height: 0.3, radius: 0.15 },
-  { side: -1, z: 4.9, width: 0.42, height: 0.42, radius: 0.21 },
-  { side: 1, z: -3.0, width: 2.5, height: 0.3, radius: 0.1 },
-  { side: 1, z: 0.3, width: 1.62, height: 0.58, radius: 0.1 },
-  { side: 1, z: 3.1, width: 0.96, height: 0.3, radius: 0.15 },
+  { side: -1, z: -3.1, width: 0.86, height: 0.2, radius: 0.1 },
+  { side: -1, z: -0.5, width: 0.86, height: 0.2, radius: 0.1 },
+  { side: -1, z: 1.7, width: 0.86, height: 0.2, radius: 0.1 },
+  { side: -1, z: 4.3, width: 0.3, height: 0.3, radius: 0.15 },
+  { side: 1, z: -3.0, width: 2.3, height: 0.18, radius: 0.08 },
+  { side: 1, z: 0.1, width: 1.45, height: 0.3, radius: 0.08 },
+  { side: 1, z: 2.7, width: 0.86, height: 0.2, radius: 0.1 },
 ]
+
+export const VENT_SLOT_COUNT = 9
+export const VENT_SLOT_WIDTH = 0.13
+export const VENT_SLOT_HEIGHT = 0.16
+export const VENT_START_Z = -9.4
+export const VENT_PITCH = 0.42
 
 export const PHONE_WIDTH = 7.15
 export const PHONE_HEIGHT = 14.96

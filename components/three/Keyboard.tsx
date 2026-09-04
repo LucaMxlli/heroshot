@@ -7,7 +7,7 @@ import { createKeyboardLegendTexture } from '@/lib/keyboardLegends'
 import { roundedPlaneGeometry, roundedSlabGeometry } from '@/lib/geometry'
 import { KEYBOARD_DEPTH, KEYBOARD_WIDTH } from '@/lib/laptopDimensions'
 
-const KEY_HEIGHT = 0.19
+const KEY_HEIGHT = 0.22
 
 interface KeyboardProps {
   keyColor: string
@@ -20,7 +20,7 @@ export function Keyboard({ keyColor }: KeyboardProps) {
     () =>
       groupKeysBySize(keys).map((group) => ({
         ...group,
-        geometry: roundedSlabGeometry(group.width, group.depth, KEY_HEIGHT, 0.085, 0.045, 5),
+        geometry: roundedSlabGeometry(group.width, group.depth, KEY_HEIGHT, 0.1, 0.055, 6),
       })),
     [keys],
   )
@@ -39,8 +39,8 @@ export function Keyboard({ keyColor }: KeyboardProps) {
     () =>
       new THREE.MeshStandardMaterial({
         color: new THREE.Color(keyColor),
-        roughness: 0.55,
-        metalness: 0.08,
+        roughness: 0.48,
+        metalness: 0.05,
       }),
     [keyColor],
   )

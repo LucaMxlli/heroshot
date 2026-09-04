@@ -141,7 +141,7 @@ export function createKeyboardLegendTexture(keys: KeyRect[], width: number, dept
 
   const scaleX = canvasWidth / width
   const scaleY = canvasHeight / depth
-  const ink = 'rgba(238, 240, 245, 0.94)'
+  const ink = 'rgba(244, 246, 250, 0.98)'
 
   keys.forEach((key) => {
     const cx = (key.x + width / 2) * scaleX

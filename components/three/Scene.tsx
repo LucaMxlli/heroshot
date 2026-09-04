@@ -14,6 +14,7 @@ import { StudioLighting } from '@/components/three/StudioLighting'
 import { Watch } from '@/components/three/Watch'
 import { useAdaptiveAspect } from '@/hooks/useAdaptiveAspect'
 import { useEditorStore } from '@/hooks/useEditorStore'
+import { markMainDrag, setMainHovered } from '@/lib/dragTarget'
 import { getDisplayMetrics, getImacMetrics, getLaptopMetrics } from '@/lib/adaptiveScreen'
 import {
   BASE_THICKNESS,
@@ -47,11 +48,23 @@ export function Scene() {
       <StudioLighting />
       <Suspense fallback={null}>
         <DeviceRig>
-          {kind === 'laptop' ? <Laptop /> : null}
-          {kind === 'phone' ? <Phone /> : null}
-          {kind === 'display' ? <Display /> : null}
-          {kind === 'imac' ? <Imac /> : null}
-          {kind === 'watch' ? <Watch /> : null}
+          <group
+            onPointerDown={(event) => {
+              event.stopPropagation()
+              markMainDrag()
+            }}
+            onPointerOver={(event) => {
+              event.stopPropagation()
+              setMainHovered(true)
+            }}
+            onPointerOut={() => setMainHovered(false)}
+          >
+            {kind === 'laptop' ? <Laptop /> : null}
+            {kind === 'phone' ? <Phone /> : null}
+            {kind === 'display' ? <Display /> : null}
+            {kind === 'imac' ? <Imac /> : null}
+            {kind === 'watch' ? <Watch /> : null}
+          </group>
           <Companion />
         </DeviceRig>
       </Suspense>

@@ -116,7 +116,7 @@ const ROWS: KeyDef[][] = [
 const TOTAL_UNITS = 14
 const FUNCTION_ROW_SCALE = 0.6
 
-export function buildKeyboardLayout(width: number, depth: number, gap = 0.19): KeyRect[] {
+export function buildKeyboardLayout(width: number, depth: number, gap = 0.24): KeyRect[] {
   const unit = width / TOTAL_UNITS
   const rowUnitTotal = FUNCTION_ROW_SCALE + (ROWS.length - 1)
   const rowPitch = depth / rowUnitTotal

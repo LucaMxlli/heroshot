@@ -33,7 +33,7 @@ export function roundedBoxGeometry(
     bevelThickness: b,
     bevelSize: b,
     bevelOffset: 0,
-    bevelSegments: 3,
+    bevelSegments: 6,
     curveSegments,
     steps: 1,
   })

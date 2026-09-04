@@ -23,6 +23,11 @@ import {
   FRONT_SCOOP_DEPTH,
   FRONT_SCOOP_WIDTH,
   PORTS,
+  VENT_PITCH,
+  VENT_SLOT_COUNT,
+  VENT_SLOT_HEIGHT,
+  VENT_SLOT_WIDTH,
+  VENT_START_Z,
   BASE_THICKNESS,
   BASE_WIDTH,
   CORNER_RADIUS,
@@ -56,18 +61,18 @@ export function Laptop() {
 
   const geometries = useMemo(
     () => ({
-      base: roundedSlabGeometry(BASE_WIDTH, BASE_DEPTH, BASE_THICKNESS, CORNER_RADIUS, 0.075, 16),
-      lid: roundedBoxGeometry(LID_WIDTH, lidHeight, LID_THICKNESS, CORNER_RADIUS, 0.06, 16),
+      base: roundedSlabGeometry(BASE_WIDTH, BASE_DEPTH, BASE_THICKNESS, CORNER_RADIUS, 0.19, 18),
+      lid: roundedBoxGeometry(LID_WIDTH, lidHeight, LID_THICKNESS, CORNER_RADIUS, 0.1, 18),
       glass: roundedPlaneGeometry(LID_WIDTH - 0.06, lidHeight - 0.06, CORNER_RADIUS - 0.03, 14),
-      well: roundedSlabGeometry(KEYBOARD_WIDTH + 0.55, KEYBOARD_DEPTH + 0.5, 0.1, 0.4, 0.03, 8),
+      well: roundedSlabGeometry(KEYBOARD_WIDTH + 0.42, KEYBOARD_DEPTH + 0.36, 0.06, 0.34, 0.02, 10),
       trackpadSeam: roundedSlabGeometry(TRACKPAD_WIDTH + 0.09, TRACKPAD_DEPTH + 0.09, 0.04, 0.62, 0.014, 10),
       trackpad: roundedSlabGeometry(TRACKPAD_WIDTH, TRACKPAD_DEPTH, 0.05, 0.58, 0.016, 10),
       grille: roundedPlaneGeometry(2.35, KEYBOARD_DEPTH - 0.4, 0.25, 8),
       foot: new THREE.CylinderGeometry(0.42, 0.46, 0.13, 20),
       hingeBar: new THREE.CylinderGeometry(0.3, 0.3, BASE_WIDTH - 2.4, 24),
       camera: new THREE.CircleGeometry(0.062, 20),
-      scoop: roundedPlaneGeometry(FRONT_SCOOP_WIDTH, FRONT_SCOOP_DEPTH, 0.3, 12),
-      hingeCover: roundedSlabGeometry(BASE_WIDTH - 3.6, 1.35, 0.22, 0.16, 0.05, 8),
+      vent: roundedPlaneGeometry(VENT_SLOT_WIDTH, VENT_SLOT_HEIGHT, VENT_SLOT_WIDTH / 2, 6),
+      scoop: roundedPlaneGeometry(FRONT_SCOOP_WIDTH, FRONT_SCOOP_DEPTH, FRONT_SCOOP_DEPTH / 2, 12),
     }),
     [lidHeight],
   )
@@ -91,9 +96,9 @@ export function Laptop() {
     return {
       aluminium,
       well: new THREE.MeshStandardMaterial({
-        color: new THREE.Color(finish.keyboardWell),
-        roughness: 0.78,
-        metalness: 0.25,
+        color: new THREE.Color('#0a0b0e'),
+        roughness: 0.9,
+        metalness: 0.1,
       }),
       trackpad: new THREE.MeshPhysicalMaterial({
         color: new THREE.Color(finish.body),
@@ -129,15 +134,17 @@ export function Laptop() {
         roughness: 0.72,
         metalness: 0.3,
       }),
-      port: new THREE.MeshStandardMaterial({
-        color: new THREE.Color('#141519'),
-        roughness: 0.95,
-        metalness: 0.1,
+      port: new THREE.MeshBasicMaterial({ color: new THREE.Color('#0a0b0f') }),
+      portRim: new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#6f747c'),
+        roughness: 0.45,
+        metalness: 0.7,
       }),
       scoop: new THREE.MeshStandardMaterial({
-        color: new THREE.Color('#15171b'),
-        roughness: 0.95,
-        metalness: 0.1,
+        color: new THREE.Color(finish.body).multiplyScalar(0.72),
+        roughness: finish.roughness + 0.12,
+        metalness: finish.metalness,
+        envMapIntensity: 0.4,
       }),
     }
   }, [finish])
@@ -172,34 +179,47 @@ export function Laptop() {
           geometry={geometries.hingeBar}
           material={materials.dark}
           rotation={[0, 0, Math.PI / 2]}
-          position={[0, BASE_TOP - 0.16, -BASE_DEPTH / 2 + HINGE_INSET]}
-        />
-        <mesh
-          geometry={geometries.hingeCover}
-          material={materials.dark}
-          position={[0, BASE_TOP - 0.05, -BASE_DEPTH / 2 + HINGE_INSET + 0.5]}
+          position={[0, BASE_TOP - 0.24, -BASE_DEPTH / 2 + HINGE_INSET]}
         />
         <mesh
           geometry={geometries.scoop}
           material={materials.scoop}
-          position={[0, 0.06, BASE_DEPTH / 2 + 0.005]}
+          position={[0, 0.02, BASE_DEPTH / 2 + 0.03]}
         />
 
+        {[-1, 1].map((side) =>
+          Array.from({ length: VENT_SLOT_COUNT }).map((_, index) => (
+            <mesh
+              key={`vent-${side}-${index}`}
+              geometry={geometries.vent}
+              material={materials.port}
+              rotation={[0, (side * Math.PI) / 2, 0]}
+              position={[side * (BASE_WIDTH / 2 + 0.028), 0, VENT_START_Z + index * VENT_PITCH]}
+            />
+          )),
+        )}
+
         {PORTS.map((port, index) => (
-          <mesh
+          <group
             key={`port-${index}`}
-            material={materials.port}
             rotation={[0, (port.side * Math.PI) / 2, 0]}
-            position={[port.side * (BASE_WIDTH / 2 + 0.006), 0, port.z]}
+            position={[port.side * (BASE_WIDTH / 2 + 0.03), 0, port.z]}
           >
-            <shapeGeometry args={[roundedRectShape(port.width, port.height, port.radius)]} />
-          </mesh>
+            <mesh material={materials.portRim}>
+              <shapeGeometry
+                args={[roundedRectShape(port.width + 0.07, port.height + 0.07, port.radius + 0.035)]}
+              />
+            </mesh>
+            <mesh material={materials.port} position={[0, 0, 0.006]}>
+              <shapeGeometry args={[roundedRectShape(port.width, port.height, port.radius)]} />
+            </mesh>
+          </group>
         ))}
 
         <mesh
           geometry={geometries.well}
           material={materials.well}
-          position={[0, BASE_TOP - 0.02, KEYBOARD_CENTER_Z]}
+          position={[0, BASE_TOP + 0.004, KEYBOARD_CENTER_Z]}
           receiveShadow
         />
 

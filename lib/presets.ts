@@ -68,7 +68,7 @@ export const FINISHES: FinishSpec[] = [
     swatch: '#d3d6da',
     body: '#b7bcc3',
     keyboardWell: '#1c1e23',
-    key: '#2b2e35',
+    key: '#33373f',
     roughness: 0.5,
     metalness: 0.55,
   },

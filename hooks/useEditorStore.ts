@@ -25,6 +25,7 @@ interface EditorState {
   sidebarOpen: boolean
   toast: { id: number; message: string } | null
   presets: PresetFile[]
+  reference: { url: string | null; name: string; opacity: number; visible: boolean; onTop: boolean }
 
   pushHistory: () => void
   setTransform: (patch: Partial<TransformState>) => void
@@ -36,6 +37,8 @@ interface EditorState {
   setCompanionScreen: (screen: ScreenSource | null) => void
   hydrate: (doc: EditorDocument) => void
   setPresets: (presets: PresetFile[]) => void
+  setReferenceImage: (url: string | null, name: string) => void
+  setReferenceOptions: (patch: Partial<{ opacity: number; visible: boolean; onTop: boolean }>) => void
   applyPreset: (transform: Partial<TransformState>, cameraDistance?: number) => void
 
   undo: () => void
@@ -75,6 +78,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   sidebarOpen: true,
   toast: null,
   presets: [],
+  reference: { url: null, name: '', opacity: 0.5, visible: true, onTop: true },
 
   pushHistory: () =>
     set((state) => ({
@@ -104,6 +108,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   hydrate: (doc) => set({ doc, past: [], future: [] }),
 
   setPresets: (presets) => set({ presets }),
+
+  setReferenceImage: (url, name) =>
+    set((state) => {
+      if (state.reference.url) URL.revokeObjectURL(state.reference.url)
+      return { reference: { ...state.reference, url, name, visible: true } }
+    }),
+
+  setReferenceOptions: (patch) =>
+    set((state) => ({ reference: { ...state.reference, ...patch } })),
 
   applyPreset: (transform, cameraDistance) => {
     get().pushHistory()

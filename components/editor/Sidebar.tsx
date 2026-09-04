@@ -27,6 +27,8 @@ import {
 } from '@/components/ui/Icons'
 import { useEditorStore } from '@/hooks/useEditorStore'
 import { useScenePresets } from '@/hooks/useScenePresets'
+import { pickImageFile } from '@/hooks/useImageUpload'
+import { isAcceptedFile } from '@/lib/screenTexture'
 import { useImageUpload } from '@/hooks/useImageUpload'
 import { COMPANION_DEFAULTS, COMPANION_ZOOM_FACTOR } from '@/lib/defaults'
 import { DEFAULT_DOCUMENT, DEVICE_DISTANCE, LIMITS } from '@/lib/defaults'
@@ -59,6 +61,9 @@ export function Sidebar() {
   const setCompanion = useEditorStore((state) => state.setCompanion)
   const pushHistory = useEditorStore((state) => state.pushHistory)
   const notify = useEditorStore((state) => state.notify)
+  const reference = useEditorStore((state) => state.reference)
+  const setReferenceImage = useEditorStore((state) => state.setReferenceImage)
+  const setReferenceOptions = useEditorStore((state) => state.setReferenceOptions)
   const { openPicker, clearScreen } = useImageUpload()
   const companionUpload = useImageUpload('companion')
   const { presets: customPresets, applyPreset: applyPresetFile, removePreset: removeCustomPreset, downloadPreset } = useScenePresets()
@@ -666,6 +671,71 @@ export function Sidebar() {
             editor.
           </p>
         )}
+      </Section>
+
+      <Section title="Reference" icon={<ImageIcon width={13} height={13} />} defaultOpen={false}>
+        <p className="text-[11.5px] leading-relaxed text-[var(--app-ink-faint)]">
+          Lay a picture over the preview to match its angle. It is only a guide and never appears in
+          the export.
+        </p>
+        <Button
+          variant="secondary"
+          className="w-full"
+          onClick={async () => {
+            const file = await pickImageFile()
+            if (!file) return
+            if (!isAcceptedFile(file)) {
+              notify('Unsupported format. Use PNG, JPG or WEBP.')
+              return
+            }
+            setReferenceImage(URL.createObjectURL(file), file.name)
+          }}
+        >
+          <UploadIcon width={14} height={14} />
+          {reference.url ? 'Replace reference' : 'Upload reference'}
+        </Button>
+
+        {reference.url ? (
+          <>
+            <div className="flex items-center gap-2 rounded-lg border border-[var(--app-border)] bg-[var(--app-muted)] px-2.5 py-2">
+              <ImageIcon width={14} height={14} className="shrink-0 text-[var(--app-ink-faint)]" />
+              <p className="min-w-0 flex-1 truncate text-[12.5px] font-medium">{reference.name}</p>
+              <button
+                type="button"
+                onClick={() => setReferenceImage(null, '')}
+                aria-label="Remove reference"
+                className="rounded-md p-1 text-[var(--app-ink-faint)] transition-colors hover:bg-[var(--app-border)] hover:text-[var(--app-ink)]"
+              >
+                <TrashIcon width={14} height={14} />
+              </button>
+            </div>
+            <SliderControl
+              label="Opacity"
+              value={reference.opacity}
+              min={0}
+              max={1}
+              step={0.01}
+              precision={2}
+              onChange={(opacity) => setReferenceOptions({ opacity })}
+              onReset={() => setReferenceOptions({ opacity: 0.5 })}
+            />
+            <SegmentedControl
+              size="sm"
+              value={reference.onTop ? 'front' : 'behind'}
+              onChange={(value) => setReferenceOptions({ onTop: value === 'front' })}
+              options={[
+                { value: 'front', label: 'In front' },
+                { value: 'behind', label: 'Behind' },
+              ]}
+            />
+            <Toggle
+              label="Show reference"
+              hint="Hide it to check your work on its own"
+              checked={reference.visible}
+              onChange={(visible) => setReferenceOptions({ visible })}
+            />
+          </>
+        ) : null}
       </Section>
 
       <Section title="Light & shadow" icon={<SunIcon width={13} height={13} />}>

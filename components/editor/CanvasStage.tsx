@@ -11,7 +11,9 @@ import { LIMITS } from '@/lib/defaults'
 import { CAMERA_FOV, REFERENCE_ASPECT } from '@/lib/camera'
 import {
   consumeCompanionDrag,
+  consumeMainDrag,
   isCompanionHovered,
+  isMainHovered,
   isPointOverCompanion,
 } from '@/lib/dragTarget'
 import { clamp, cx } from '@/lib/utils'
@@ -34,7 +36,7 @@ function StageSkeleton() {
   )
 }
 
-type DragMode = 'rotate' | 'pan' | 'companion' | null
+type DragMode = 'rotate' | 'pan' | 'companion' | 'main' | null
 
 function wrapAngle(value: number) {
   let angle = value
@@ -64,6 +66,7 @@ export function CanvasStage() {
   const { acceptFiles, openPicker } = useImageUpload()
   const companionUpload = useImageUpload('companion')
   const hasCompanion = useEditorStore((state) => state.doc.companion.kind !== 'none')
+  const reference = useEditorStore((state) => state.reference)
 
   const applyZoom = useCallback((deltaDistance: number) => {
     const store = useEditorStore.getState()
@@ -74,6 +77,22 @@ export function CanvasStage() {
         LIMITS.cameraDistance.max,
       ),
     })
+  }, [])
+
+  useEffect(() => {
+    const stop = () => {
+      pointers.current.clear()
+      pinchDistance.current = 0
+      dragMode.current = null
+    }
+    window.addEventListener('pointerup', stop)
+    window.addEventListener('pointercancel', stop)
+    window.addEventListener('blur', stop)
+    return () => {
+      window.removeEventListener('pointerup', stop)
+      window.removeEventListener('pointercancel', stop)
+      window.removeEventListener('blur', stop)
+    }
   }, [])
 
   useEffect(() => {
@@ -161,15 +180,25 @@ export function CanvasStage() {
 
     useEditorStore.getState().pushHistory()
     const grabbingCompanion = consumeCompanionDrag()
-    dragMode.current = grabbingCompanion
-      ? 'companion'
-      : event.shiftKey || event.button === 1
+    const grabbingMain = consumeMainDrag()
+    dragMode.current =
+      event.shiftKey || event.button === 1
         ? 'pan'
-        : 'rotate'
+        : grabbingCompanion
+          ? 'companion'
+          : grabbingMain
+            ? 'main'
+            : 'rotate'
     last.current = { x: event.clientX, y: event.clientY }
   }
 
   const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (dragMode.current && event.buttons === 0) {
+      pointers.current.clear()
+      pinchDistance.current = 0
+      dragMode.current = null
+      return
+    }
     if (!pointers.current.has(event.pointerId)) return
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
 
@@ -189,7 +218,7 @@ export function CanvasStage() {
     const store = useEditorStore.getState()
     const { transform } = store.doc
 
-    if (dragMode.current === 'companion') {
+    if (dragMode.current === 'companion' || dragMode.current === 'main') {
       const rect = container.current?.getBoundingClientRect()
       const height = rect?.height ?? 800
       const aspect = (rect?.width ?? 1200) / Math.max(height, 1)
@@ -197,6 +226,22 @@ export function CanvasStage() {
       const dolly = store.doc.scene.cameraDistance * fit
       const worldPerPixel =
         (2 * dolly * Math.tan(((CAMERA_FOV / 2) * Math.PI) / 180)) / Math.max(height, 1)
+      if (dragMode.current === 'main') {
+        store.setTransform({
+          positionX: clamp(
+            transform.positionX + dx * worldPerPixel,
+            LIMITS.positionX.min,
+            LIMITS.positionX.max,
+          ),
+          positionY: clamp(
+            transform.positionY - dy * worldPerPixel,
+            LIMITS.positionY.min,
+            LIMITS.positionY.max,
+          ),
+        })
+        return
+      }
+
       const scale = Math.max(transform.scale, 0.05)
       const worldX = (dx * worldPerPixel) / scale
       const worldY = (-dy * worldPerPixel) / scale
@@ -239,7 +284,7 @@ export function CanvasStage() {
       )}
       onPointerDown={onPointerDown}
       onPointerMove={(event) => {
-        if (!dragMode.current) setGrabbable(isCompanionHovered())
+        if (!dragMode.current) setGrabbable(isCompanionHovered() || isMainHovered())
         onPointerMove(event)
       }}
       onPointerUp={endPointer}
@@ -270,7 +315,21 @@ export function CanvasStage() {
         void (ontoCompanion ? companionUpload.acceptFiles(files) : acceptFiles(files))
       }}
     >
-      <Viewport key={glKey} />
+      <div className="absolute inset-0" style={{ zIndex: reference.onTop ? 1 : 2 }}>
+        <Viewport key={glKey} />
+      </div>
+
+      {reference.url && reference.visible ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={reference.url}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+          style={{ opacity: reference.opacity, zIndex: reference.onTop ? 2 : 1 }}
+        />
+      ) : null}
+
       <DropOverlay visible={dropping} />
 
       {glLost && (
