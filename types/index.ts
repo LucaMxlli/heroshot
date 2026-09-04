@@ -72,6 +72,7 @@ export interface ScreenSource {
 export interface DeviceState {
   kind: DeviceKind
   orientation: PhoneOrientation
+  laptopModel: import('@/lib/laptopVariants').LaptopModel
 }
 
 export interface EditorDocument {

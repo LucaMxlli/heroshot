@@ -4,6 +4,7 @@ export const DEFAULT_DOCUMENT: EditorDocument = {
   device: {
     kind: 'laptop',
     orientation: 'portrait',
+    laptopModel: 'pro14',
   },
   companion: {
     kind: 'none',

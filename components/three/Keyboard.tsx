@@ -5,20 +5,24 @@ import * as THREE from 'three'
 import { buildKeyboardLayout, groupKeysBySize } from '@/lib/keyboardLayout'
 import { createKeyboardLegendTexture } from '@/lib/keyboardLegends'
 import { roundedPlaneGeometry, roundedSlabGeometry } from '@/lib/geometry'
-import { KEYBOARD_DEPTH, KEYBOARD_WIDTH } from '@/lib/laptopDimensions'
+import type { LaptopSpec } from '@/lib/laptopVariants'
 
 const KEY_HEIGHT = 0.22
 
 interface KeyboardProps {
   keyColor: string
+  spec: LaptopSpec
 }
 
-export function Keyboard({ keyColor }: KeyboardProps) {
-  const keys = useMemo(() => buildKeyboardLayout(KEYBOARD_WIDTH, KEYBOARD_DEPTH), [])
+export function Keyboard({ keyColor, spec }: KeyboardProps) {
+  const keys = useMemo(
+    () => buildKeyboardLayout(spec.keyboardWidth, spec.keyboardDepth, 0.24, spec.touchBar),
+    [spec],
+  )
 
   const groups = useMemo(
     () =>
-      groupKeysBySize(keys).map((group) => ({
+      groupKeysBySize(keys.filter((key) => key.role !== 'touchbar')).map((group) => ({
         ...group,
         geometry: roundedSlabGeometry(group.width, group.depth, KEY_HEIGHT, 0.1, 0.055, 6),
       })),
@@ -26,13 +30,16 @@ export function Keyboard({ keyColor }: KeyboardProps) {
   )
 
   const legendGeometry = useMemo(
-    () => roundedPlaneGeometry(KEYBOARD_WIDTH, KEYBOARD_DEPTH, 0.2, 4),
-    [],
+    () => roundedPlaneGeometry(spec.keyboardWidth, spec.keyboardDepth, 0.2, 4),
+    [spec],
   )
 
   const legendTexture = useMemo(
-    () => (typeof document === 'undefined' ? null : createKeyboardLegendTexture(keys, KEYBOARD_WIDTH, KEYBOARD_DEPTH)),
-    [keys],
+    () =>
+      typeof document === 'undefined'
+        ? null
+        : createKeyboardLegendTexture(keys, spec.keyboardWidth, spec.keyboardDepth),
+    [keys, spec],
   )
 
   const material = useMemo(

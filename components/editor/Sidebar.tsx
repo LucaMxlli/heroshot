@@ -27,6 +27,8 @@ import {
 } from '@/components/ui/Icons'
 import { useEditorStore } from '@/hooks/useEditorStore'
 import { useScenePresets } from '@/hooks/useScenePresets'
+import { LAPTOP_MODELS } from '@/lib/laptopVariants'
+import type { LaptopModel } from '@/lib/laptopVariants'
 import { pickImageFile } from '@/hooks/useImageUpload'
 import { isAcceptedFile } from '@/lib/screenTexture'
 import { useImageUpload } from '@/hooks/useImageUpload'
@@ -189,6 +191,33 @@ export function Sidebar() {
               { value: 'landscape', label: 'Landscape' },
             ]}
           />
+        ) : null}
+
+        {device.kind === 'laptop' ? (
+          <div>
+            <span className="mb-1.5 block text-[12.5px] font-medium">Model</span>
+            <div className="grid grid-cols-2 gap-1.5">
+              {LAPTOP_MODELS.map((entry) => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  title={entry.hint}
+                  onClick={() => {
+                    pushHistory()
+                    setDevice({ laptopModel: entry.id as LaptopModel })
+                  }}
+                  className={cx(
+                    'rounded-lg border px-2 py-1.5 text-[11.5px] font-medium transition-colors duration-150',
+                    device.laptopModel === entry.id
+                      ? 'border-[var(--app-ink)] bg-[var(--app-muted)] text-[var(--app-ink)]'
+                      : 'border-[var(--app-border)] text-[var(--app-ink-soft)] hover:bg-[var(--app-muted)]',
+                  )}
+                >
+                  {entry.label}
+                </button>
+              ))}
+            </div>
+          </div>
         ) : null}
 
         <div>

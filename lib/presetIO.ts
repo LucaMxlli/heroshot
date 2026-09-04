@@ -62,6 +62,11 @@ export function sanitisePayload(raw: unknown): PresetPayload {
     device: {
       kind: deviceKind,
       orientation: pick(d.orientation, ['portrait', 'landscape'] as const, base.device.orientation),
+      laptopModel: pick(
+        d.laptopModel,
+        ['pro14', 'pro16', 'air13', 'touchbar'] as const,
+        base.device.laptopModel,
+      ),
     },
     companion: {
       kind: pick(c.kind, ['none', 'phone', 'watch'] as const, base.companion.kind),

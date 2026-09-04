@@ -29,7 +29,7 @@ export const NOTCH_HEIGHT = 1.3
 export const NOTCH_RADIUS = 0.42
 
 export const FRONT_SCOOP_WIDTH = 5.4
-export const FRONT_SCOOP_DEPTH = 0.22
+export const FRONT_SCOOP_DEPTH = 0.32
 
 export interface PortSpec {
   side: -1 | 1

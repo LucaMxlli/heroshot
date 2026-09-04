@@ -1,4 +1,4 @@
-export type KeyRole = 'normal' | 'modifier' | 'function' | 'touchid' | 'space' | 'arrow'
+export type KeyRole = 'normal' | 'modifier' | 'function' | 'touchid' | 'space' | 'arrow' | 'touchbar'
 
 export interface KeyDef {
   label: string
@@ -116,7 +116,12 @@ const ROWS: KeyDef[][] = [
 const TOTAL_UNITS = 14
 const FUNCTION_ROW_SCALE = 0.6
 
-export function buildKeyboardLayout(width: number, depth: number, gap = 0.24): KeyRect[] {
+export function buildKeyboardLayout(
+  width: number,
+  depth: number,
+  gap = 0.24,
+  touchBar = false,
+): KeyRect[] {
   const unit = width / TOTAL_UNITS
   const rowUnitTotal = FUNCTION_ROW_SCALE + (ROWS.length - 1)
   const rowPitch = depth / rowUnitTotal
@@ -124,7 +129,17 @@ export function buildKeyboardLayout(width: number, depth: number, gap = 0.24): K
 
   let cursorZ = -depth / 2
 
-  ROWS.forEach((row, rowIndex) => {
+  const rows = touchBar
+    ? [
+        [
+          { label: '', units: 13.25, role: 'touchbar' as KeyRole },
+          { label: '', units: 0.75, role: 'touchid' as KeyRole },
+        ],
+        ...ROWS.slice(1),
+      ]
+    : ROWS
+
+  rows.forEach((row, rowIndex) => {
     const rowScale = rowIndex === 0 ? FUNCTION_ROW_SCALE : 1
     const rowHeight = rowPitch * rowScale
     const keyDepth = rowHeight - gap
@@ -147,7 +162,7 @@ export function buildKeyboardLayout(width: number, depth: number, gap = 0.24): K
       cursorX += slot
     })
 
-    if (rowIndex === ROWS.length - 1) {
+    if (rowIndex === rows.length - 1) {
       const remaining = width / 2 - cursorX
       const columnWidth = remaining / 3
       const arrowWidth = columnWidth - gap

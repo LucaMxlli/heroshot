@@ -16,13 +16,12 @@ import { useAdaptiveAspect } from '@/hooks/useAdaptiveAspect'
 import { useEditorStore } from '@/hooks/useEditorStore'
 import { markMainDrag, setMainHovered } from '@/lib/dragTarget'
 import { getDisplayMetrics, getImacMetrics, getLaptopMetrics } from '@/lib/adaptiveScreen'
+import { getLaptopSpec } from '@/lib/laptopVariants'
 import {
-  BASE_THICKNESS,
   DISPLAY_SCREEN_ASPECT,
   IMAC_SCREEN_ASPECT,
   PHONE_HEIGHT,
   PHONE_WIDTH,
-  SCREEN_ASPECT,
   WATCH_TOTAL_HEIGHT,
 } from '@/lib/laptopDimensions'
 
@@ -30,17 +29,19 @@ export function Scene() {
   const kind = useEditorStore((state) => state.doc.device.kind)
   const orientation = useEditorStore((state) => state.doc.device.orientation)
 
-  const laptopAspect = useAdaptiveAspect(SCREEN_ASPECT, LAPTOP_MIN_ASPECT, LAPTOP_MAX_ASPECT)
+  const laptopSpec = getLaptopSpec(useEditorStore((state) => state.doc.device.laptopModel))
+  const laptopAspect = useAdaptiveAspect(laptopSpec.screenAspect, LAPTOP_MIN_ASPECT, LAPTOP_MAX_ASPECT)
   const displayAspect = useAdaptiveAspect(DISPLAY_SCREEN_ASPECT, DISPLAY_MIN_ASPECT, DISPLAY_MAX_ASPECT)
   const imacAspect = useAdaptiveAspect(IMAC_SCREEN_ASPECT, IMAC_MIN_ASPECT, IMAC_MAX_ASPECT)
 
   const groundY = useMemo(() => {
-    if (kind === 'laptop') return getLaptopMetrics(laptopAspect).pivotY - BASE_THICKNESS / 2 - 0.14
+    if (kind === 'laptop')
+      return getLaptopMetrics(laptopSpec, laptopAspect).pivotY - laptopSpec.baseThickness / 2 - 0.14
     if (kind === 'display') return getDisplayMetrics(displayAspect).pivotY - 0.1
     if (kind === 'imac') return getImacMetrics(imacAspect).pivotY - 0.1
     if (kind === 'watch') return -WATCH_TOTAL_HEIGHT / 2 - 0.1
     return -(orientation === 'landscape' ? PHONE_WIDTH : PHONE_HEIGHT) / 2 - 0.1
-  }, [kind, orientation, laptopAspect, displayAspect, imacAspect])
+  }, [kind, orientation, laptopSpec, laptopAspect, displayAspect, imacAspect])
 
   return (
     <>

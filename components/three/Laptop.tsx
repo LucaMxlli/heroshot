@@ -8,6 +8,7 @@ import { Screen } from '@/components/three/Screen'
 import { useEditorStore } from '@/hooks/useEditorStore'
 import { useAdaptiveAspect } from '@/hooks/useAdaptiveAspect'
 import { getLaptopMetrics } from '@/lib/adaptiveScreen'
+import { getLaptopSpec } from '@/lib/laptopVariants'
 import {
   roundedBoxGeometry,
   roundedPlaneGeometry,
@@ -19,62 +20,53 @@ import { getFinish } from '@/lib/presets'
 import { registerSnapshotHandler } from '@/lib/exportBridge'
 import { damp } from '@/lib/utils'
 import {
-  BASE_DEPTH,
   FRONT_SCOOP_DEPTH,
-  FRONT_SCOOP_WIDTH,
-  PORTS,
   VENT_PITCH,
   VENT_SLOT_COUNT,
   VENT_SLOT_HEIGHT,
   VENT_SLOT_WIDTH,
   VENT_START_Z,
-  BASE_THICKNESS,
-  BASE_WIDTH,
-  CORNER_RADIUS,
   HINGE_INSET,
-  KEYBOARD_DEPTH,
-  KEYBOARD_WIDTH,
-  LID_THICKNESS,
-  LID_WIDTH,
-  SCREEN_ASPECT,
-  SCREEN_WIDTH,
-  TRACKPAD_DEPTH,
-  TRACKPAD_WIDTH,
 } from '@/lib/laptopDimensions'
 
 const DEG = Math.PI / 180
 export const LAPTOP_MIN_ASPECT = 1.05
 export const LAPTOP_MAX_ASPECT = 2.6
-const BASE_TOP = BASE_THICKNESS / 2
-const KEYBOARD_CENTER_Z = -BASE_DEPTH / 2 + 1.45 + KEYBOARD_DEPTH / 2
-const TRACKPAD_CENTER_Z = BASE_DEPTH / 2 - 1.95 - TRACKPAD_DEPTH / 2
 
 export function Laptop() {
   const hinge = useRef<THREE.Group>(null)
   const finishId = useEditorStore((state) => state.doc.scene.finish)
   const finish = getFinish(finishId)
-  const screenAspect = useAdaptiveAspect(SCREEN_ASPECT, LAPTOP_MIN_ASPECT, LAPTOP_MAX_ASPECT)
-  const { screenHeight, lidHeight, screenOffsetY, pivotY } = useMemo(
-    () => getLaptopMetrics(screenAspect),
-    [screenAspect],
+  const model = useEditorStore((state) => state.doc.device.laptopModel)
+  const spec = getLaptopSpec(model)
+  const screenAspect = useAdaptiveAspect(spec.screenAspect, LAPTOP_MIN_ASPECT, LAPTOP_MAX_ASPECT)
+  const { screenWidth, screenHeight, lidHeight, screenOffsetY, pivotY } = useMemo(
+    () => getLaptopMetrics(spec, screenAspect),
+    [spec, screenAspect],
   )
+
+  const BASE_TOP = spec.baseThickness / 2
+  const KEYBOARD_CENTER_Z =
+    -spec.baseDepth / 2 + spec.keyboardBackMargin + spec.keyboardDepth / 2
+  const TRACKPAD_CENTER_Z =
+    spec.baseDepth / 2 - spec.trackpadFrontMargin - spec.trackpadDepth / 2
 
   const geometries = useMemo(
     () => ({
-      base: roundedSlabGeometry(BASE_WIDTH, BASE_DEPTH, BASE_THICKNESS, CORNER_RADIUS, 0.13, 20),
-      lid: roundedBoxGeometry(LID_WIDTH, lidHeight, LID_THICKNESS, CORNER_RADIUS, 0.1, 18),
-      glass: roundedPlaneGeometry(LID_WIDTH - 0.06, lidHeight - 0.06, CORNER_RADIUS - 0.03, 14),
-      well: roundedSlabGeometry(KEYBOARD_WIDTH + 0.42, KEYBOARD_DEPTH + 0.36, 0.06, 0.34, 0.02, 10),
-      trackpadSeam: roundedSlabGeometry(TRACKPAD_WIDTH + 0.09, TRACKPAD_DEPTH + 0.09, 0.04, 0.62, 0.014, 10),
-      trackpad: roundedSlabGeometry(TRACKPAD_WIDTH, TRACKPAD_DEPTH, 0.05, 0.58, 0.016, 10),
-      grille: roundedPlaneGeometry(2.35, KEYBOARD_DEPTH - 0.4, 0.25, 8),
+      base: roundedSlabGeometry(spec.baseWidth, spec.baseDepth, spec.baseThickness, spec.cornerRadius, 0.13, 20),
+      lid: roundedBoxGeometry(spec.baseWidth, lidHeight, spec.lidThickness, spec.cornerRadius, 0.1, 18),
+      glass: roundedPlaneGeometry(spec.baseWidth - 0.06, lidHeight - 0.06, spec.cornerRadius - 0.03, 14),
+      well: roundedSlabGeometry(spec.keyboardWidth + 0.42, spec.keyboardDepth + 0.36, 0.06, 0.34, 0.02, 10),
+      trackpadSeam: roundedSlabGeometry(spec.trackpadWidth + 0.09, spec.trackpadDepth + 0.09, 0.04, 0.62, 0.014, 10),
+      trackpad: roundedSlabGeometry(spec.trackpadWidth, spec.trackpadDepth, 0.05, 0.58, 0.016, 10),
+      grille: roundedPlaneGeometry(2.35, spec.keyboardDepth - 0.4, 0.25, 8),
       foot: new THREE.CylinderGeometry(0.42, 0.46, 0.13, 20),
-      hingeBar: new THREE.CylinderGeometry(0.3, 0.3, BASE_WIDTH - 2.4, 24),
+      hingeBar: new THREE.CylinderGeometry(0.3, 0.3, spec.baseWidth - 2.4, 24),
       camera: new THREE.CircleGeometry(0.062, 20),
       vent: roundedPlaneGeometry(VENT_SLOT_WIDTH, VENT_SLOT_HEIGHT, VENT_SLOT_WIDTH / 2, 6),
-      scoop: roundedPlaneGeometry(FRONT_SCOOP_WIDTH, FRONT_SCOOP_DEPTH, FRONT_SCOOP_DEPTH / 2, 12),
+      scoop: roundedPlaneGeometry(spec.scoopWidth, FRONT_SCOOP_DEPTH, FRONT_SCOOP_DEPTH / 2, 12),
     }),
-    [lidHeight],
+    [lidHeight, spec],
   )
 
   useEffect(
@@ -142,10 +134,10 @@ export function Laptop() {
         envMapIntensity: 1.4,
       }),
       scoop: new THREE.MeshStandardMaterial({
-        color: new THREE.Color(finish.body).multiplyScalar(0.72),
-        roughness: finish.roughness + 0.12,
-        metalness: finish.metalness,
-        envMapIntensity: 0.4,
+        color: new THREE.Color(finish.body).multiplyScalar(0.3),
+        roughness: 0.85,
+        metalness: 0.2,
+        envMapIntensity: 0.18,
       }),
     }
   }, [finish])
@@ -180,12 +172,12 @@ export function Laptop() {
           geometry={geometries.hingeBar}
           material={materials.dark}
           rotation={[0, 0, Math.PI / 2]}
-          position={[0, BASE_TOP - 0.24, -BASE_DEPTH / 2 + HINGE_INSET]}
+          position={[0, BASE_TOP - 0.24, -spec.baseDepth / 2 + HINGE_INSET]}
         />
         <mesh
           geometry={geometries.scoop}
           material={materials.scoop}
-          position={[0, 0.02, BASE_DEPTH / 2 + 0.03]}
+          position={[0, 0.02, spec.baseDepth / 2 + 0.03]}
         />
 
         {[-1, 1].map((side) =>
@@ -195,16 +187,16 @@ export function Laptop() {
               geometry={geometries.vent}
               material={materials.port}
               rotation={[0, (side * Math.PI) / 2, 0]}
-              position={[side * (BASE_WIDTH / 2 + 0.028), 0, VENT_START_Z + index * VENT_PITCH]}
+              position={[side * (spec.baseWidth / 2 + 0.028), 0, VENT_START_Z + index * VENT_PITCH]}
             />
           )),
         )}
 
-        {PORTS.map((port, index) => (
+        {spec.ports.map((port, index) => (
           <group
             key={`port-${index}`}
             rotation={[0, (port.side * Math.PI) / 2, 0]}
-            position={[port.side * (BASE_WIDTH / 2 + 0.035), 0, port.z]}
+            position={[port.side * (spec.baseWidth / 2 + 0.035), 0, port.z]}
           >
             <mesh material={materials.portRim}>
               <shapeGeometry
@@ -225,7 +217,7 @@ export function Laptop() {
         />
 
         <group position={[0, BASE_TOP + 0.035, KEYBOARD_CENTER_Z]}>
-          <Keyboard keyColor={finish.key} />
+          <Keyboard keyColor={finish.key} spec={spec} />
         </group>
 
         {[-1, 1].map((side) => (
@@ -234,7 +226,7 @@ export function Laptop() {
             geometry={geometries.grille}
             material={materials.grille}
             rotation={[-Math.PI / 2, 0, 0]}
-            position={[side * (KEYBOARD_WIDTH / 2 + 1.55), BASE_TOP + 0.005, KEYBOARD_CENTER_Z]}
+            position={[side * (spec.keyboardWidth / 2 + 1.55), BASE_TOP + 0.005, KEYBOARD_CENTER_Z]}
           />
         ))}
 
@@ -251,29 +243,29 @@ export function Laptop() {
         />
 
         {[
-          [-BASE_WIDTH / 2 + 2.6, -BASE_DEPTH / 2 + 2.2],
-          [BASE_WIDTH / 2 - 2.6, -BASE_DEPTH / 2 + 2.2],
-          [-BASE_WIDTH / 2 + 2.6, BASE_DEPTH / 2 - 2.2],
-          [BASE_WIDTH / 2 - 2.6, BASE_DEPTH / 2 - 2.2],
+          [-spec.baseWidth / 2 + 2.6, -spec.baseDepth / 2 + 2.2],
+          [spec.baseWidth / 2 - 2.6, -spec.baseDepth / 2 + 2.2],
+          [-spec.baseWidth / 2 + 2.6, spec.baseDepth / 2 - 2.2],
+          [spec.baseWidth / 2 - 2.6, spec.baseDepth / 2 - 2.2],
         ].map(([x, z]) => (
           <mesh
             key={`${x}-${z}`}
             geometry={geometries.foot}
             material={materials.dark}
-            position={[x, -BASE_THICKNESS / 2 - 0.05, z]}
+            position={[x, -spec.baseThickness / 2 - 0.05, z]}
           />
         ))}
 
-        <group ref={hinge} position={[0, BASE_TOP - 0.08, -BASE_DEPTH / 2 + HINGE_INSET]}>
-          <group position={[0, lidHeight / 2, -LID_THICKNESS / 2]}>
+        <group ref={hinge} position={[0, BASE_TOP - 0.08, -spec.baseDepth / 2 + HINGE_INSET]}>
+          <group position={[0, lidHeight / 2, -spec.lidThickness / 2]}>
             <mesh geometry={geometries.lid} material={materials.aluminium} castShadow receiveShadow />
             <mesh
               geometry={geometries.glass}
               material={materials.glass}
-              position={[0, 0, LID_THICKNESS / 2 + 0.005]}
+              position={[0, 0, spec.lidThickness / 2 + 0.005]}
             />
-            <group position={[0, screenOffsetY, LID_THICKNESS / 2 + 0.014]}>
-              <Screen width={SCREEN_WIDTH} height={screenHeight} radius={0.22} />
+            <group position={[0, screenOffsetY, spec.lidThickness / 2 + 0.014]}>
+              <Screen width={screenWidth} height={screenHeight} radius={0.22} />
             </group>
             <mesh
               geometry={geometries.camera}
@@ -281,7 +273,7 @@ export function Laptop() {
               position={[
                 0,
                 screenOffsetY + screenHeight / 2 + 0.28,
-                LID_THICKNESS / 2 + 0.023,
+                spec.lidThickness / 2 + 0.023,
               ]}
             />
           </group>

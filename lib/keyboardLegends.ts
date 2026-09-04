@@ -164,6 +164,33 @@ export function createKeyboardLegendTexture(keys: KeyRect[], width: number, dept
       return
     }
 
+    if (key.role === 'touchbar') {
+      ctx.fillStyle = 'rgba(9,10,14,0.96)'
+      ctx.beginPath()
+      ctx.roundRect(cx - w / 2, cy - h / 2, w, h, h * 0.18)
+      ctx.fill()
+
+      ctx.fillStyle = 'rgba(255,255,255,0.1)'
+      const pillW = w * 0.24
+      ctx.beginPath()
+      ctx.roundRect(cx - pillW / 2, cy - h * 0.3, pillW, h * 0.6, h * 0.3)
+      ctx.fill()
+      ctx.font = `500 ${h * 0.34}px ${FONT}`
+      ctx.fillStyle = 'rgba(255,255,255,0.55)'
+      ctx.textAlign = 'center'
+      ctx.fillText('Search', cx, cy + h * 0.12)
+
+      const left = cx - w / 2 + w * 0.05
+      ;['brightness-down', 'brightness-up', 'mission', 'search'].forEach((icon, i) => {
+        drawIcon(ctx, icon, left + i * w * 0.06, cy, h * 0.62)
+      })
+      const right = cx + w / 2 - w * 0.05
+      ;['rewind', 'play', 'forward', 'volume-up'].forEach((icon, i) => {
+        drawIcon(ctx, icon, right - (3 - i) * w * 0.06, cy, h * 0.62)
+      })
+      return
+    }
+
     if (key.role === 'function') {
       drawIcon(ctx, key.icon ?? '', cx, cy + h * 0.05, h * 0.78)
       ctx.font = `600 ${h * 0.3}px ${FONT}`

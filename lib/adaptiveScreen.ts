@@ -1,7 +1,5 @@
+import type { LaptopSpec } from '@/lib/laptopVariants'
 import {
-  BASE_THICKNESS,
-  BEZEL_BOTTOM,
-  BEZEL_TOP,
   DISPLAY_ARM_HEIGHT,
   DISPLAY_BEZEL,
   DISPLAY_FOOT_THICKNESS,
@@ -11,27 +9,29 @@ import {
   IMAC_CHIN,
   IMAC_FOOT_THICKNESS,
   IMAC_SCREEN_WIDTH,
-  SCREEN_WIDTH,
 } from '@/lib/laptopDimensions'
 
 const LID_TILT_FACTOR = 0.97
 
 export interface LaptopMetrics {
+  screenWidth: number
   screenHeight: number
   lidHeight: number
   screenOffsetY: number
   pivotY: number
 }
 
-export function getLaptopMetrics(screenAspect: number): LaptopMetrics {
-  const screenHeight = SCREEN_WIDTH / screenAspect
-  const lidHeight = screenHeight + BEZEL_TOP + BEZEL_BOTTOM
-  const top = BASE_THICKNESS / 2 + lidHeight * LID_TILT_FACTOR
+export function getLaptopMetrics(spec: LaptopSpec, screenAspect: number): LaptopMetrics {
+  const screenWidth = spec.baseWidth - spec.bezelSide * 2
+  const screenHeight = screenWidth / screenAspect
+  const lidHeight = screenHeight + spec.bezelTop + spec.bezelBottom
+  const top = spec.baseThickness / 2 + lidHeight * LID_TILT_FACTOR
   return {
+    screenWidth,
     screenHeight,
     lidHeight,
-    screenOffsetY: (BEZEL_BOTTOM - BEZEL_TOP) / 2,
-    pivotY: -(top - BASE_THICKNESS / 2) / 2,
+    screenOffsetY: (spec.bezelBottom - spec.bezelTop) / 2,
+    pivotY: -(top - spec.baseThickness / 2) / 2,
   }
 }
 
