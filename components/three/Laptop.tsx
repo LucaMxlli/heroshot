@@ -61,7 +61,7 @@ export function Laptop() {
 
   const geometries = useMemo(
     () => ({
-      base: roundedSlabGeometry(BASE_WIDTH, BASE_DEPTH, BASE_THICKNESS, CORNER_RADIUS, 0.19, 18),
+      base: roundedSlabGeometry(BASE_WIDTH, BASE_DEPTH, BASE_THICKNESS, CORNER_RADIUS, 0.13, 20),
       lid: roundedBoxGeometry(LID_WIDTH, lidHeight, LID_THICKNESS, CORNER_RADIUS, 0.1, 18),
       glass: roundedPlaneGeometry(LID_WIDTH - 0.06, lidHeight - 0.06, CORNER_RADIUS - 0.03, 14),
       well: roundedSlabGeometry(KEYBOARD_WIDTH + 0.42, KEYBOARD_DEPTH + 0.36, 0.06, 0.34, 0.02, 10),
@@ -134,11 +134,12 @@ export function Laptop() {
         roughness: 0.72,
         metalness: 0.3,
       }),
-      port: new THREE.MeshBasicMaterial({ color: new THREE.Color('#0a0b0f') }),
+      port: new THREE.MeshBasicMaterial({ color: new THREE.Color('#000000') }),
       portRim: new THREE.MeshStandardMaterial({
-        color: new THREE.Color('#6f747c'),
-        roughness: 0.45,
-        metalness: 0.7,
+        color: new THREE.Color('#e6e9ee'),
+        roughness: 0.25,
+        metalness: 0.9,
+        envMapIntensity: 1.4,
       }),
       scoop: new THREE.MeshStandardMaterial({
         color: new THREE.Color(finish.body).multiplyScalar(0.72),
@@ -203,11 +204,11 @@ export function Laptop() {
           <group
             key={`port-${index}`}
             rotation={[0, (port.side * Math.PI) / 2, 0]}
-            position={[port.side * (BASE_WIDTH / 2 + 0.03), 0, port.z]}
+            position={[port.side * (BASE_WIDTH / 2 + 0.035), 0, port.z]}
           >
             <mesh material={materials.portRim}>
               <shapeGeometry
-                args={[roundedRectShape(port.width + 0.07, port.height + 0.07, port.radius + 0.035)]}
+                args={[roundedRectShape(port.width + 0.05, port.height + 0.05, port.radius + 0.025)]}
               />
             </mesh>
             <mesh material={materials.port} position={[0, 0, 0.006]}>

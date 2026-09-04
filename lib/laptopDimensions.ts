@@ -40,18 +40,18 @@ export interface PortSpec {
 }
 
 export const PORTS: PortSpec[] = [
-  { side: -1, z: -3.1, width: 0.86, height: 0.2, radius: 0.1 },
-  { side: -1, z: -0.5, width: 0.86, height: 0.2, radius: 0.1 },
-  { side: -1, z: 1.7, width: 0.86, height: 0.2, radius: 0.1 },
-  { side: -1, z: 4.3, width: 0.3, height: 0.3, radius: 0.15 },
-  { side: 1, z: -3.0, width: 2.3, height: 0.18, radius: 0.08 },
-  { side: 1, z: 0.1, width: 1.45, height: 0.3, radius: 0.08 },
-  { side: 1, z: 2.7, width: 0.86, height: 0.2, radius: 0.1 },
+  { side: -1, z: -3.3, width: 1.25, height: 0.4, radius: 0.2 },
+  { side: -1, z: -0.7, width: 1.15, height: 0.38, radius: 0.19 },
+  { side: -1, z: 1.7, width: 1.15, height: 0.38, radius: 0.19 },
+  { side: -1, z: 4.5, width: 0.42, height: 0.42, radius: 0.21 },
+  { side: 1, z: -3.2, width: 2.9, height: 0.34, radius: 0.15 },
+  { side: 1, z: 0.1, width: 1.95, height: 0.42, radius: 0.12 },
+  { side: 1, z: 3.0, width: 1.15, height: 0.38, radius: 0.19 },
 ]
 
 export const VENT_SLOT_COUNT = 9
-export const VENT_SLOT_WIDTH = 0.13
-export const VENT_SLOT_HEIGHT = 0.16
+export const VENT_SLOT_WIDTH = 0.17
+export const VENT_SLOT_HEIGHT = 0.3
 export const VENT_START_Z = -9.4
 export const VENT_PITCH = 0.42
 
