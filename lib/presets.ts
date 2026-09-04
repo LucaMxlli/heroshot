@@ -398,8 +398,8 @@ export const SCENE_PRESETS: ScenePreset[] = [
     hint: 'Low, turned view that actually shows the ports and vents on the side',
     device: 'laptop',
     companion: { kind: 'none' },
-    transform: { rotationX: 6, rotationY: 64, rotationZ: 0, positionX: 0, positionY: -1, scale: 1, lidAngle: 100 },
-    cameraDistance: 46,
+    transform: { rotationX: 9, rotationY: 62, rotationZ: 0, positionX: 0, positionY: 2.5, scale: 1, lidAngle: 98 },
+    cameraDistance: 70,
   },
   {
     id: 'mac-watch',

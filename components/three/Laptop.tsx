@@ -63,8 +63,8 @@ export function Laptop() {
       foot: new THREE.CylinderGeometry(0.42, 0.46, 0.13, 20),
       hingeBar: new THREE.CylinderGeometry(0.3, 0.3, spec.baseWidth - 2.4, 24),
       camera: new THREE.CircleGeometry(0.062, 20),
-      vent: roundedPlaneGeometry(VENT_SLOT_WIDTH, VENT_SLOT_HEIGHT, VENT_SLOT_WIDTH / 2, 6),
-      scoop: roundedPlaneGeometry(spec.scoopWidth, FRONT_SCOOP_DEPTH, FRONT_SCOOP_DEPTH / 2, 12),
+      vent: roundedBoxGeometry(VENT_SLOT_WIDTH, VENT_SLOT_HEIGHT, 0.14, VENT_SLOT_WIDTH / 2.2, 0.02, 6),
+      scoop: roundedBoxGeometry(spec.scoopWidth, FRONT_SCOOP_DEPTH, 0.16, FRONT_SCOOP_DEPTH / 2.2, 0.02, 12),
     }),
     [lidHeight, spec],
   )
@@ -126,7 +126,11 @@ export function Laptop() {
         roughness: 0.72,
         metalness: 0.3,
       }),
-      port: new THREE.MeshBasicMaterial({ color: new THREE.Color('#000000') }),
+      port: new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#08090c'),
+        roughness: 0.95,
+        metalness: 0.05,
+      }),
       portRim: new THREE.MeshStandardMaterial({
         color: new THREE.Color('#e6e9ee'),
         roughness: 0.25,
@@ -177,7 +181,7 @@ export function Laptop() {
         <mesh
           geometry={geometries.scoop}
           material={materials.scoop}
-          position={[0, 0.02, spec.baseDepth / 2 + 0.03]}
+          position={[0, 0.02, spec.baseDepth / 2 - 0.02]}
         />
 
         {[-1, 1].map((side) =>
@@ -187,7 +191,7 @@ export function Laptop() {
               geometry={geometries.vent}
               material={materials.port}
               rotation={[0, (side * Math.PI) / 2, 0]}
-              position={[side * (spec.baseWidth / 2 + 0.028), 0, VENT_START_Z + index * VENT_PITCH]}
+              position={[side * (spec.baseWidth / 2 - 0.02), 0, VENT_START_Z + index * VENT_PITCH]}
             />
           )),
         )}
@@ -196,15 +200,13 @@ export function Laptop() {
           <group
             key={`port-${index}`}
             rotation={[0, (port.side * Math.PI) / 2, 0]}
-            position={[port.side * (spec.baseWidth / 2 + 0.035), 0, port.z]}
+            position={[port.side * (spec.baseWidth / 2 - 0.02), 0, port.z]}
           >
             <mesh material={materials.portRim}>
-              <shapeGeometry
-                args={[roundedRectShape(port.width + 0.05, port.height + 0.05, port.radius + 0.025)]}
-              />
+              <boxGeometry args={[port.width + 0.06, port.height + 0.06, 0.16]} />
             </mesh>
-            <mesh material={materials.port} position={[0, 0, 0.006]}>
-              <shapeGeometry args={[roundedRectShape(port.width, port.height, port.radius)]} />
+            <mesh material={materials.port} position={[0, 0, 0.05]}>
+              <boxGeometry args={[port.width, port.height, 0.14]} />
             </mesh>
           </group>
         ))}
