@@ -21,7 +21,11 @@ export interface LaptopMetrics {
   pivotY: number
 }
 
-export function getLaptopMetrics(spec: LaptopSpec, screenAspect: number): LaptopMetrics {
+export function getLaptopMetrics(
+  spec: LaptopSpec,
+  screenAspect: number,
+  screenOnly = false,
+): LaptopMetrics {
   const screenWidth = spec.baseWidth - spec.bezelSide * 2
   const screenHeight = screenWidth / screenAspect
   const lidHeight = screenHeight + spec.bezelTop + spec.bezelBottom
@@ -31,7 +35,7 @@ export function getLaptopMetrics(spec: LaptopSpec, screenAspect: number): Laptop
     screenHeight,
     lidHeight,
     screenOffsetY: (spec.bezelBottom - spec.bezelTop) / 2,
-    pivotY: -(top - spec.baseThickness / 2) / 2,
+    pivotY: screenOnly ? 0 : -(top - spec.baseThickness / 2) / 2,
   }
 }
 

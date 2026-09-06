@@ -67,6 +67,7 @@ export function sanitisePayload(raw: unknown): PresetPayload {
         ['pro14', 'pro16', 'air13', 'touchbar'] as const,
         base.device.laptopModel,
       ),
+      screenOnly: typeof d.screenOnly === 'boolean' ? d.screenOnly : base.device.screenOnly,
     },
     companion: {
       kind: pick(c.kind, ['none', 'phone', 'watch'] as const, base.companion.kind),

@@ -33,7 +33,7 @@ import { pickImageFile } from '@/hooks/useImageUpload'
 import { isAcceptedFile } from '@/lib/screenTexture'
 import { useImageUpload } from '@/hooks/useImageUpload'
 import { COMPANION_DEFAULTS, COMPANION_ZOOM_FACTOR } from '@/lib/defaults'
-import { DEFAULT_DOCUMENT, DEVICE_DISTANCE, LIMITS } from '@/lib/defaults'
+import { DEFAULT_DOCUMENT, getDeviceDistance, LIMITS } from '@/lib/defaults'
 import { BACKGROUND_PRESETS, FINISHES, LOOK_PRESETS, SCENE_PRESETS } from '@/lib/presets'
 import { cx } from '@/lib/utils'
 import type {
@@ -72,12 +72,22 @@ export function Sidebar() {
 
   const { transform, background, scene, device, screen, companion, companionScreen } = doc
   const isPhone = device.kind === 'phone'
+  const isScreenOnly = device.kind === 'laptop' && device.screenOnly
 
   const changeDevice = (kind: DeviceKind) => {
     if (kind === device.kind) return
     pushHistory()
     setDevice({ kind })
-    setScene({ cameraDistance: DEVICE_DISTANCE[kind] })
+    setScene({ cameraDistance: getDeviceDistance({ ...device, kind }) })
+  }
+
+  const changeScreenOnly = (screenOnly: boolean) => {
+    pushHistory()
+    setDevice({ screenOnly })
+    const distance = getDeviceDistance({ ...device, screenOnly })
+    setScene({
+      cameraDistance: companion.kind === 'none' ? distance : distance * COMPANION_ZOOM_FACTOR,
+    })
   }
 
   const changeCompanion = (kind: CompanionKind) => {
@@ -85,8 +95,8 @@ export function Sidebar() {
     pushHistory()
     const base = COMPANION_DEFAULTS[device.kind]
     setCompanion({ kind, ...base, scale: kind === 'watch' ? 1.6 : 1 })
-    if (kind === 'none') setScene({ cameraDistance: DEVICE_DISTANCE[device.kind] })
-    else setScene({ cameraDistance: DEVICE_DISTANCE[device.kind] * COMPANION_ZOOM_FACTOR })
+    if (kind === 'none') setScene({ cameraDistance: getDeviceDistance(device) })
+    else setScene({ cameraDistance: getDeviceDistance(device) * COMPANION_ZOOM_FACTOR })
   }
 
   return (
@@ -216,6 +226,14 @@ export function Sidebar() {
                   {entry.label}
                 </button>
               ))}
+            </div>
+            <div className="mt-2.5">
+              <Toggle
+                label="Screen only"
+                hint="Hide the base, keyboard and hinge — just the display."
+                checked={device.screenOnly}
+                onChange={changeScreenOnly}
+              />
             </div>
           </div>
         ) : null}
@@ -511,7 +529,7 @@ export function Sidebar() {
           step={LIMITS.cameraDistance.step}
           precision={0}
           onChange={(cameraDistance) => setScene({ cameraDistance })}
-          onReset={() => setScene({ cameraDistance: DEVICE_DISTANCE[device.kind] })}
+          onReset={() => setScene({ cameraDistance: getDeviceDistance(device) })}
         />
       </Section>
 
@@ -568,7 +586,7 @@ export function Sidebar() {
           onChange={(scale) => setTransform({ scale })}
           onReset={() => setTransform({ scale: 1 })}
         />
-        {!isPhone && (
+        {!isPhone && !isScreenOnly && (
           <SliderControl
             label="Screen angle"
             value={transform.lidAngle}

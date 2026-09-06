@@ -28,6 +28,7 @@ import {
 export function Scene() {
   const kind = useEditorStore((state) => state.doc.device.kind)
   const orientation = useEditorStore((state) => state.doc.device.orientation)
+  const screenOnly = useEditorStore((state) => state.doc.device.screenOnly)
 
   const laptopSpec = getLaptopSpec(useEditorStore((state) => state.doc.device.laptopModel))
   const laptopAspect = useAdaptiveAspect(laptopSpec.screenAspect, LAPTOP_MIN_ASPECT, LAPTOP_MAX_ASPECT)
@@ -35,13 +36,16 @@ export function Scene() {
   const imacAspect = useAdaptiveAspect(IMAC_SCREEN_ASPECT, IMAC_MIN_ASPECT, IMAC_MAX_ASPECT)
 
   const groundY = useMemo(() => {
-    if (kind === 'laptop')
-      return getLaptopMetrics(laptopSpec, laptopAspect).pivotY - laptopSpec.baseThickness / 2 - 0.14
+    if (kind === 'laptop') {
+      const metrics = getLaptopMetrics(laptopSpec, laptopAspect, screenOnly)
+      if (screenOnly) return -metrics.lidHeight / 2 - 0.14
+      return metrics.pivotY - laptopSpec.baseThickness / 2 - 0.14
+    }
     if (kind === 'display') return getDisplayMetrics(displayAspect).pivotY - 0.1
     if (kind === 'imac') return getImacMetrics(imacAspect).pivotY - 0.1
     if (kind === 'watch') return -WATCH_TOTAL_HEIGHT / 2 - 0.1
     return -(orientation === 'landscape' ? PHONE_WIDTH : PHONE_HEIGHT) / 2 - 0.1
-  }, [kind, orientation, laptopSpec, laptopAspect, displayAspect, imacAspect])
+  }, [kind, orientation, screenOnly, laptopSpec, laptopAspect, displayAspect, imacAspect])
 
   return (
     <>

@@ -38,11 +38,12 @@ export function Laptop() {
   const finishId = useEditorStore((state) => state.doc.scene.finish)
   const finish = getFinish(finishId)
   const model = useEditorStore((state) => state.doc.device.laptopModel)
+  const screenOnly = useEditorStore((state) => state.doc.device.screenOnly)
   const spec = getLaptopSpec(model)
   const screenAspect = useAdaptiveAspect(spec.screenAspect, LAPTOP_MIN_ASPECT, LAPTOP_MAX_ASPECT)
   const { screenWidth, screenHeight, lidHeight, screenOffsetY, pivotY } = useMemo(
-    () => getLaptopMetrics(spec, screenAspect),
-    [spec, screenAspect],
+    () => getLaptopMetrics(spec, screenAspect, screenOnly),
+    [spec, screenAspect, screenOnly],
   )
 
   const BASE_TOP = spec.baseThickness / 2
@@ -168,6 +169,29 @@ export function Laptop() {
 
   useFrame((_, delta) => applyLid(false, Math.min(delta, 0.05)))
 
+  const lid = (
+    <>
+      <mesh geometry={geometries.lid} material={materials.aluminium} castShadow receiveShadow />
+      <mesh
+        geometry={geometries.glass}
+        material={materials.glass}
+        position={[0, 0, spec.lidThickness / 2 + 0.005]}
+      />
+      <group position={[0, screenOffsetY, spec.lidThickness / 2 + 0.014]}>
+        <Screen width={screenWidth} height={screenHeight} radius={0.22} />
+      </group>
+      <mesh
+        geometry={geometries.camera}
+        material={materials.seam}
+        position={[0, screenOffsetY + screenHeight / 2 + 0.28, spec.lidThickness / 2 + 0.023]}
+      />
+    </>
+  )
+
+  if (screenOnly) {
+    return <group position={[0, pivotY, 0]}>{lid}</group>
+  }
+
   return (
     <group position={[0, pivotY, 0]}>
         <mesh geometry={geometries.base} material={materials.aluminium} castShadow receiveShadow />
@@ -259,26 +283,7 @@ export function Laptop() {
         ))}
 
         <group ref={hinge} position={[0, BASE_TOP - 0.08, -spec.baseDepth / 2 + HINGE_INSET]}>
-          <group position={[0, lidHeight / 2, -spec.lidThickness / 2]}>
-            <mesh geometry={geometries.lid} material={materials.aluminium} castShadow receiveShadow />
-            <mesh
-              geometry={geometries.glass}
-              material={materials.glass}
-              position={[0, 0, spec.lidThickness / 2 + 0.005]}
-            />
-            <group position={[0, screenOffsetY, spec.lidThickness / 2 + 0.014]}>
-              <Screen width={screenWidth} height={screenHeight} radius={0.22} />
-            </group>
-            <mesh
-              geometry={geometries.camera}
-              material={materials.seam}
-              position={[
-                0,
-                screenOffsetY + screenHeight / 2 + 0.28,
-                spec.lidThickness / 2 + 0.023,
-              ]}
-            />
-          </group>
+          <group position={[0, lidHeight / 2, -spec.lidThickness / 2]}>{lid}</group>
       </group>
     </group>
   )

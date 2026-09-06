@@ -1,7 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
-import { DEFAULT_DOCUMENT, DEVICE_DISTANCE } from '@/lib/defaults'
+import { DEFAULT_DOCUMENT, getDeviceDistance } from '@/lib/defaults'
 import type { PresetFile } from '@/lib/presetIO'
 import type {
   BackgroundState,
@@ -160,7 +160,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       doc: {
         ...state.doc,
         transform: { ...DEFAULT_DOCUMENT.transform },
-        scene: { ...state.doc.scene, cameraDistance: DEVICE_DISTANCE[state.doc.device.kind] },
+        scene: { ...state.doc.scene, cameraDistance: getDeviceDistance(state.doc.device) },
       },
     }))
   },
@@ -173,7 +173,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         device: { ...state.doc.device },
         scene: {
           ...DEFAULT_DOCUMENT.scene,
-          cameraDistance: DEVICE_DISTANCE[state.doc.device.kind],
+          cameraDistance: getDeviceDistance(state.doc.device),
         },
         screen: state.doc.screen,
       },

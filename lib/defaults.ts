@@ -1,10 +1,11 @@
-import type { DeviceKind, EditorDocument } from '@/types'
+import type { DeviceKind, DeviceState, EditorDocument } from '@/types'
 
 export const DEFAULT_DOCUMENT: EditorDocument = {
   device: {
     kind: 'laptop',
     orientation: 'portrait',
     laptopModel: 'pro14',
+    screenOnly: false,
   },
   companion: {
     kind: 'none',
@@ -79,4 +80,11 @@ export const DEVICE_DISTANCE: Record<DeviceKind, number> = {
   display: 108,
   imac: 126,
   watch: 26,
+}
+
+export const LAPTOP_SCREEN_ONLY_DISTANCE = 64
+
+export function getDeviceDistance(device: DeviceState) {
+  if (device.kind === 'laptop' && device.screenOnly) return LAPTOP_SCREEN_ONLY_DISTANCE
+  return DEVICE_DISTANCE[device.kind]
 }

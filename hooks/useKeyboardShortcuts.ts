@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useEditorStore } from '@/hooks/useEditorStore'
-import { DEVICE_DISTANCE, LIMITS } from '@/lib/defaults'
+import { getDeviceDistance, LIMITS } from '@/lib/defaults'
 import { VIEW_PRESETS } from '@/lib/presets'
 import { clamp } from '@/lib/utils'
 
@@ -80,7 +80,7 @@ export function useKeyboardShortcuts({ onExport, onUpload, onShortcuts }: Shortc
           const next = order[(order.indexOf(store.doc.device.kind) + 1) % order.length]
           store.pushHistory()
           store.setDevice({ kind: next })
-          store.setScene({ cameraDistance: DEVICE_DISTANCE[next] })
+          store.setScene({ cameraDistance: getDeviceDistance({ ...store.doc.device, kind: next }) })
           break
         }
         case '?':
